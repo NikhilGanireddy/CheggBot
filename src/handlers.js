@@ -82,7 +82,7 @@ const handleCheckSubscriptionCommand = async (bot, msg, inlineKeyboard) => {
 const handleAddSubscriptionCommand = async (bot, msg, match, inlineKeyboard) => {
     const chatId = msg.chat.id;
     const msgId = msg.message_id;
-    if (msg.from.id !== parseInt("1738520439")) {
+    if (msg.from.id !== parseInt(process.env.ADMIN_USER_ID)) {
         await bot.sendMessage(chatId, "🚫 Unauthorized Access 🚫", { reply_to_message_id: msgId });
         return;
     }

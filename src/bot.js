@@ -4,7 +4,7 @@ const { handleIncomingMessage, handleStartCommand, handleCheckSubscriptionComman
 const { inlineKeyboard } = require('./inlineKeyboard');
 
 // Initialize Telegram Bot
-const bot = new TelegramBot("6813317549:AAHzK5R0CxbczrOMKD75umxXCtxS0rDfhWc", { polling: true });
+const bot = new TelegramBot(process.env.TELEGRAM_BOT_TOKEN, { polling: true });
 
 // Event handlers
 bot.on('message', (msg) => handleIncomingMessage(bot, msg));

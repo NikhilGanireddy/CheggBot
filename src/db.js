@@ -1,6 +1,6 @@
 const { MongoClient } = require('mongodb');
 
-const url = "mongodb+srv://nikhilganireddy:Kakatiya2021@cluster0.tdfpdad.mongodb.net/chatgpt-4-sample";
+const url = process.env.MONGODB_URL;
 
 if (!url) {
     throw new Error('MONGODB_URL environment variable is not set.');
