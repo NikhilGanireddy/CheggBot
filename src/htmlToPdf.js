@@ -24,13 +24,11 @@ const createHtmlContent = (chatResponse) => {
     `;
 };
 
-const htmlToPdf = (htmlContent, userId, callback) => {
+const htmlToPdf = (htmlContent, callback) => {
     const options = { format: 'Letter' };
-
-    pdf.create(htmlContent, options).toFile(`./Solutions/${userId}/Premium Solution-${Date.now()}.pdf`, (err, res) => {
+    pdf.create(htmlContent, options).toBuffer((err, buffer) => {
         if (err) return console.log(err);
-        console.log(`Sent to userId: ${userId}, fileName: ${res.filename}`);
-        callback(res.filename);
+        callback(buffer);
     });
 };
 

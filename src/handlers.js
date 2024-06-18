@@ -1,4 +1,4 @@
-const { connect } = require('./db');
+const { connect, savePdf, retrievePdf } = require('./db');
 const { sendMessageToChatGPT } = require('./chatgpt');
 const { createHtmlContent, htmlToPdf } = require('./htmlToPdf');
 const { inlineKeyboard } = require('./inlineKeyboard');
@@ -26,6 +26,7 @@ const handleIncomingMessage = async (bot, msg) => {
         return;
     }
 
+    let imageURL;
     if (msg.photo && result.allowed) {
         const numberOfPics = msg.photo.length;
         imageURL = await bot.getFileLink(msg.photo[numberOfPics - 1].file_id);
@@ -33,30 +34,30 @@ const handleIncomingMessage = async (bot, msg) => {
         sendMessageToChatGPT(msg.text, imageURL)
             .then((response) => {
                 const htmlContent = createHtmlContent(response);
-                htmlToPdf(htmlContent, chatId, (pdfFile) => {
-                    bot.sendDocument(chatId, pdfFile, {}, { reply_to_message_id: msgId });
+                htmlToPdf(htmlContent, async (pdfBuffer) => {
+                    await savePdf(chatId, pdfBuffer); // Save PDF in MongoDB
+                    const pdfFromDb = await retrievePdf(chatId); // Retrieve PDF from MongoDB
+                    await bot.sendDocument(chatId, {
+                        source: pdfFromDb,
+                        filename: 'solution.pdf'
+                    }, {reply_to_message_id: msgId});
                 });
-            })
-            .then(() => {
-                bot.sendMessage(chatId, `🚀 Hi ${userName}!\n\n📊 Questions remaining: ${result.questionsRemaining} 🤓`, { reply_to_message_id: msgId });
             });
     } else if (result.allowed) {
         sendMessageToChatGPT(msg.text)
             .then((response) => {
                 const htmlContent = createHtmlContent(response);
-                htmlToPdf(htmlContent, chatId, (pdfFile) => {
-                    bot.sendDocument(chatId, pdfFile, {}, { reply_to_message_id: msgId });
+                htmlToPdf(htmlContent, async (pdfBuffer) => {
+                    await savePdf(chatId, pdfBuffer); // Save PDF in MongoDB
+                    const pdfFromDb = await retrievePdf(chatId); // Retrieve PDF from MongoDB
+                    await bot.sendDocument(chatId, {
+                        source: pdfFromDb,
+                        filename: 'solution.pdf'
+                    }, {reply_to_message_id: msgId});
                 });
-            })
-            .then(() => {
-                console.log(`Solution sent successfully to ${userName}`);
-            })
-            .then(() => {
-                bot.sendMessage(chatId, ` \n\n\nQuestions remaining: ${result.questionsRemaining}`, { reply_to_message_id: msgId });
             });
     }
 };
-
 const handleStartCommand = async (bot, msg, inlineKeyboard) => {
     const chatId = msg.chat.id;
     const userName = msg.from.first_name;

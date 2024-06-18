@@ -1,4 +1,4 @@
-const { MongoClient } = require('mongodb');
+const {MongoClient, Binary} = require('mongodb');
 
 const url = process.env.MONGODB_URL;
 
@@ -19,11 +19,23 @@ async function connect() {
         console.log('Connected to MongoDB');
         const db = client.db(dbName);
         const users = db.collection('users');
-        return { users };
+        return {users};
     } catch (error) {
         console.error('Error connecting to MongoDB:', error);
         throw error;
     }
 }
 
-module.exports = { connect };
+async function savePdf(userId, pdfBuffer) {
+    const {users} = await connect();
+    const pdfBinary = new Binary(pdfBuffer);
+    await users.updateOne({userId}, {$set: {pdf: pdfBinary}}, {upsert: true});
+}
+
+async function retrievePdf(userId) {
+    const {users} = await connect();
+    const user = await users.findOne({userId});
+    return user.pdf.buffer;
+}
+
+module.exports = {connect, savePdf, retrievePdf};
