@@ -1,5 +1,5 @@
 const OpenAI = require("openai");
-const openai = new OpenAI({apiKey: "sk-proj-WsxZrDXoCShOziCoCNNrT3BlbkFJcz2wsjv3lrqLpNrAlbMa"});
+const openai = new OpenAI({apiKey: "sk-proj-QXmcvOYr0pCNVKaa5ISCT3BlbkFJ1ytcsuvEnWCgMqYkUPzt"});
 
 const sendMessageToChatGPT = async (inputMessage = null, imageUrl = null) => {
     try {
