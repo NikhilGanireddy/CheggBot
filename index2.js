@@ -5,6 +5,7 @@ const pdf = require('html-pdf');
 const OpenAI = require("openai");
 const fs = require('fs');
 const stream = require('stream');
+const puppeteer = require('puppeteer');
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -177,7 +178,7 @@ bot.on('message', async (msg) => {
     const result = await decrementQuestionCount(userId, userName);
     if (!result.allowed) {
         await bot.sendMessage(chatId, result.message, {
-            reply_to_message_id: msgId, reply_markup: inlineKeyboard
+            reply_to_message_id: msgId, reply_markup: inlineKeyboard.reply_markup
         });
         return;
     }
@@ -261,15 +262,16 @@ function createHtmlContent(chatResponse) {
     `;
 }
 
-function htmlToPdf(htmlContent, userId, callback) {
-    const options = {format: 'Letter'};
+async function htmlToPdf(htmlContent, userId, callback) {
     const filePath = `/tmp/PremiumSolution-${userId}-${Date.now()}.pdf`;
-
-    pdf.create(htmlContent, options).toFile(filePath, (err, res) => {
-        if (err) return console.log(err);
-        console.log(`Generated PDF: ${res.filename}`);
-        callback(res.filename);
+    const browser = await puppeteer.launch({
+        args: ['--no-sandbox', '--disable-setuid-sandbox']  // Disable sandbox for compatibility
     });
+    const page = await browser.newPage();
+    await page.setContent(htmlContent);
+    await page.pdf({path: filePath, format: 'A4'});
+    await browser.close();
+    callback(filePath);
 }
 
 bot.onText(/\/start@samplebotaibot/, async (msg) => {
@@ -277,7 +279,7 @@ bot.onText(/\/start@samplebotaibot/, async (msg) => {
     const userName = msg.from.first_name;
     const msgId = msg.message_id;
     await bot.sendMessage(chatId, `\n🚀 Hi ${userName}!\n\n🤖 I am CheggMasterBot, created and developed by Nikhil Ganireddy (thegdp).\n\n❓ Please let me know the question you need help with, and a comprehensive, step-by-step solution will be provided! 📚✨`, {
-        reply_to_message_id: msgId, reply_markup: inlineKeyboard
+        reply_to_message_id: msgId, reply_markup: inlineKeyboard.reply_markup
     });
 });
 

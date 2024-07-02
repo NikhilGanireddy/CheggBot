@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "A telegram bot for chegg",
   "scripts": {
-    "start": "node ./src/bot.js",
+    "start": "node index2.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Nikhil Ganireddy",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.14.1",
     "axios": "^1.7.2",
     "cloudinary": "^2.2.0",
     "dotenv": "^16.4.5",
