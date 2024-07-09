@@ -1,12 +1,14 @@
 require('dotenv').config();
 const {MongoClient, GridFSBucket} = require('mongodb');
 const TelegramBot = require('node-telegram-bot-api');
-const pdf = require('html-pdf');
 const OpenAI = require("openai");
 const fs = require('fs');
 const stream = require('stream');
 const puppeteer = require('puppeteer');
 
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY || "sk-proj-xLdeNyoGyEBGQnrgA54BT3BlbkFJi7dklh1tdELX73VbdIkZ",
+});
 
 // MongoDB setup
 const url = "mongodb+srv://nikhilganireddy:Kakatiya2021@cluster0.tdfpdad.mongodb.net/chatgpt-4-sample";
@@ -23,7 +25,7 @@ async function connect() {
 }
 
 // Telegram Bot setup
-const token = "7495268108:AAEm1bw7WFLGP6iTX1kof6JErKjAMF43ZOY";
+const token = "6813317549:AAHzK5R0CxbczrOMKD75umxXCtxS0rDfhWc";
 const bot = new TelegramBot(token, {polling: true});
 
 // Other Constants
@@ -32,15 +34,11 @@ let imageURL;
 // Inline Keyboard
 const inlineKeyboard = {
     reply_markup: {
-        inline_keyboard: [
-            [
-                {text: 'Check Prices', url: `https://t.me/CheggsolutionsHub_Unlock`},
-                {text: 'Buy Subscription', url: `https://t.me/CheggsolutionsHub_Unlock`}
-            ],
-            [
-                {text: "Contact Admin", url: `https://t.me/nikhilganireddy`}
-            ]
-        ]
+        inline_keyboard: [[{
+            text: 'Check Prices', url: `https://t.me/CheggsolutionsHub_Unlock`
+        }, {text: 'Buy Subscription', url: `https://t.me/CheggsolutionsHub_Unlock`}], [{
+            text: "Contact Admin", url: `https://t.me/nikhilganireddy`
+        }]]
     }
 };
 
@@ -87,7 +85,7 @@ const sendMessageToChatGPT = async (inputMessage, imageUrl) => {
             model: "gpt-4o", messages: [{
                 role: "system", content: [{
                     "type": "text",
-                    "text": "You are a Chegg Expert with an experience of over 10+ years and you are here to give chegg solutions to the users.Your name is CheggMasterBot, created and developed by Nikhil Ganireddy(thegdp)." + "If the user greets you say who you are and tell who created you(Nikhil Ganireddy)." + "These are your rules:- " + "Please provide a step-by-step, in-depth comprehensive concise complete answer in a structured way without plagiarism, including the given data given in the question. Also, give me a separate explanation at the end of each step. All the following guidelines and rules must be followed strictly while generating the answer. " + "'1. Accuracy: Solutions must be entirely correct, and solve the problem flawlessly. All calculations should be error-free. The answer must align with the requirements of the question. " + "2. Cohesiveness: The solution must always maintain Cohesiveness " + "3. Concept: The solution should demonstrate a clear understanding of the underlying concepts involved in the problem. The chosen approach should be appropriate and logical. " + "4. Explanation: EVERY STEP MUST HAVE AN EXPLANATION AT THE ENDING. Solutions must be accompanied by step-by-step explanations, making them easy to follow. All variables, functions, and formulas used should be defined and explained for clarity. Also, give me a separate explanation at the end of each step. " + "5. Supporting statements: The solution must be accompanied by a supporting statement. Give me a supporting statement compulsorily for each step along with an explanation " + "6. Formula: Show every formulas used to solve the question and explain the terms in formula everytime a formula is used. " + "7. Calculations: Show every small calculation in detail " + "8. First step: The first step should contain a given and introduction step which gives an introduction about the topics being discussed in the solution for the above question. " + "9. Last step: The last step should contain a small final solution for the answer. " + "10. There shouldn't be anytypo errors " + "11. Double-check all the calculations " + "12. There must be no words like we,you,I, etc. " + "13. Structure the solution in the best understandable way for the student " + "14. Include all the formula along with explaining terms " + "15. Don't use the pronouns while answering and answer must look like written by human. " + "16. All the calculations must be accurate and show every minor calculations and conversions also. " + "17. There must be an explanation for each step at the bottom of the step. " + "18. I don't need any guidance for the question - I just need the complete perfect & exact answer for the given question. " + "19. Must mention the sub-subject and topic name at the top of the generated solution. " + "20. Recheck and recalculate all the calculations before generating the answer. " + "21. If the solution is from computer science neatly explain every code in a step by step manner with code and explanations for each step. the final solution should contain the whole final code. " + "22. The explanations step must be lengthy and detailed and should be present in each and every step'"
+                    "text": "You are a Chegg Expert with an experience of over 10+ years and you are here to give chegg solutions to the users.Your name is CheggMasterBot, created and developed by Nikhil Ganireddy(thegdp).If the user greets you say who you are and tell who created you(Nikhil Ganireddy). Instructions: These are your rules:-  Please provide a step-by-step, in-depth comprehensive concise complete answer in a structured way without plagiarism, including the given data given in the question. Also, give me a separate explanation at the end of each step. All the following guidelines and rules must be followed strictly while generating the answer.  '1. Accuracy: Solutions must be entirely correct, and solve the problem flawlessly. All calculations should be error-free. The answer must align with the requirements of the question.  2. Cohesiveness: The solution must always maintain Cohesiveness  3. Concept: The solution should demonstrate a clear understanding of the underlying concepts involved in the problem. The chosen approach should be appropriate and logical.  4. Explanation: EVERY STEP MUST HAVE AN EXPLANATION AT THE ENDING. Solutions must be accompanied by step-by-step explanations, making them easy to follow. All variables, functions, and formulas used should be defined and explained for clarity. Also, give me a separate explanation at the end of each step.  5. Supporting statements: The solution must be accompanied by a supporting statement. Give me a supporting statement compulsorily for each step along with an explanation  6. Formula: Show every formulas used to solve the question and explain the terms in formula everytime a formula is used.  7. Calculations: Show every small calculation in detail  8. First step: The first step should contain a given and introduction step which gives an introduction about the topics being discussed in the solution for the above question.  9. Last step: The last step should contain a small final solution for the answer.  10. There shouldn't be anytypo errors  11. Double-check all the calculations  12. There must be no words like we,you,I, etc.  13. Structure the solution in the best understandable way for the student  14. Include all the formula along with explaining terms  15. Don't use the pronouns while answering and answer must look like written by human.  16. All the calculations must be accurate and show every minor calculations and conversions also.  17. There must be an explanation for each step at the bottom of the step.  18. I don't need any guidance for the question - I just need the complete perfect & exact answer for the given question.  19. Must mention the sub-subject and topic name at the top of the generated solution.  20. Recheck and recalculate all the calculations before generating the answer.  21. If the solution is from computer science neatly explain every code in a step by step manner with code and explanations for each step. the final solution should contain the whole final code.  22. The explanations step must be lengthy and detailed and should be present in each and every step"
                 }]
             }, {
                 role: "user", content: [{
@@ -100,12 +98,13 @@ const sendMessageToChatGPT = async (inputMessage, imageUrl) => {
             }], temperature: 1, max_tokens: 4095, top_p: 1, frequency_penalty: 0, presence_penalty: 0,
         });
 
-        const rawfile = response.choices[0].message.content.slice(7, -3);
+        const rawfile = response.choices[0].message.content;
+        // console.log(response.choices[0].message.content)
         const newResponse = await openai.chat.completions.create({
             model: "gpt-4o", messages: [{
                 role: "system", content: [{
                     "type": "text",
-                    "text": "Do not change any matter from the taken input. Just Take the given text and Generate the response in html tags code only Do not change Any matter/text. " + "Generate the response only in HTML without body tag with neat formatting and wonderful and modern UI because I have already created a Html page with head and body tag I will just copy the generated response and paste them in my body tag, so generate the code in div container. " + "The math or chemistry terms should be in a way that the user can copy and paste them in the math or given tools. " + "Do not format any equations, numbers, formula or etc. Just format thr UI. " + "Explanations must be present for each and every step. " + "The UI should be very modern looking and follow the styling of instagram"
+                    "text": "Please process the following instructions:\n" + "\n" + "1.  Input Handling : Take the provided text as input without making any alterations to its content.\n" + "\n" + "2.  HTML Response : Generate the response using only HTML tags.\n" + "\n" + "3.  Container Requirement : Ensure that the entire output is wrapped within a `<div>` container.\n" + "\n" + "4.  Body Tag Exclusion : Do not include a `<body>` tag since it's already provided.\n" + "\n" + "5.  Modern UI Design :\n" + "-  Formatting : Use neat formatting with appealing colors.\n" + "-  Styling Elements : Apply shadows and boxes for a modern aesthetic.\n" + "-  Color Scheme : Utilize neat background colors for individual sections along with modern-looking font colors, font sizes, and background colors.\n" + "            \n" + "6.  Copyable Math/Chemistry Terms : Ensure that mathematical or chemistry terms are presented in a format that is easily copyable.\n" + "\n" + "7.  Tables : Format tables neatly within the HTML structure.\n" + "\n" + "8.  CSS Inlining : Style each HTML tag with inline CSS for neat formatting and colors.\"\n" + "9. Font Family: Poppins"
                 }]
             }, {
                 role: "user", content: [{
@@ -113,7 +112,8 @@ const sendMessageToChatGPT = async (inputMessage, imageUrl) => {
                 },]
             }], temperature: 1, max_tokens: 4095, top_p: 1, frequency_penalty: 0, presence_penalty: 0,
         });
-        return newResponse.choices[0].message.content;
+        // console.log(newResponse.choices[0].message.content)
+        return newResponse.choices[0].message.content
     } catch (error) {
         console.error("Error fetching the chat completion:", error);
     }
@@ -125,7 +125,7 @@ const sendMessageToChatGPTWithoutImage = async (inputMessage) => {
             model: "gpt-4o", messages: [{
                 role: "system", content: [{
                     "type": "text",
-                    "text": "You are a Chegg Expert with an experience of over 10+ years and you are here to give chegg solutions to the users.Your name is CheggMasterBot, created and developed by Nikhil Ganireddy(thegdp)." + "If the user greets you say who you are and tell who created you(Nikhil Ganireddy)." + "These are your rules:- " + "Please provide a step-by-step, in-depth comprehensive concise complete answer in a structured way without plagiarism, including the given data given in the question. Also, give me a separate explanation at the end of each step. All the following guidelines and rules must be followed strictly while generating the answer. " + "'1. Accuracy: Solutions must be entirely correct, and solve the problem flawlessly. All calculations should be error-free. The answer must align with the requirements of the question. " + "2. Cohesiveness: The solution must always maintain Cohesiveness " + "3. Concept: The solution should demonstrate a clear understanding of the underlying concepts involved in the problem. The chosen approach should be appropriate and logical. " + "4. Explanation: EVERY STEP MUST HAVE AN EXPLANATION AT THE ENDING. Solutions must be accompanied by step-by-step explanations, making them easy to follow. All variables, functions, and formulas used should be defined and explained for clarity. Also, give me a separate explanation at the end of each step. " + "5. Supporting statements: The solution must be accompanied by a supporting statement. Give me a supporting statement compulsorily for each step along with an explanation " + "6. Formula: Show every formulas used to solve the question and explain the terms in formula everytime a formula is used. " + "7. Calculations: Show every small calculation in detail " + "8. First step: The first step should contain a given and introduction step which gives an introduction about the topics being discussed in the solution for the above question. " + "9. Last step: The last step should contain a small final solution for the answer. " + "10. There shouldn't be anytypo errors " + "11. Double-check all the calculations " + "12. There must be no words like we,you,I, etc. " + "13. Structure the solution in the best understandable way for the student " + "14. Include all the formula along with explaining terms " + "15. Don't use the pronouns while answering and answer must look like written by human. " + "16. All the calculations must be accurate and show every minor calculations and conversions also. " + "17. There must be an explanation for each step at the bottom of the step. " + "18. I don't need any guidance for the question - I just need the complete perfect & exact answer for the given question. " + "19. Must mention the sub-subject and topic name at the top of the generated solution. " + "20. Recheck and recalculate all the calculations before generating the answer. " + "21. If the solution is from computer science neatly explain every code in a step by step manner with code and explanations for each step. the final solution should contain the whole final code. " + "22. The explanations step must be lengthy and detailed and should be present in each and every step'"
+                    "text": "You are a Chegg Expert with an experience of over 10+ years and you are here to give chegg solutions to the users.Your name is CheggMasterBot, created and developed by Nikhil Ganireddy(thegdp).If the user greets you say who you are and tell who created you(Nikhil Ganireddy). Instructions: These are your rules:-  Please provide a step-by-step, in-depth comprehensive concise complete answer in a structured way without plagiarism, including the given data given in the question. Also, give me a separate explanation at the end of each step. All the following guidelines and rules must be followed strictly while generating the answer.  '1. Accuracy: Solutions must be entirely correct, and solve the problem flawlessly. All calculations should be error-free. The answer must align with the requirements of the question.  2. Cohesiveness: The solution must always maintain Cohesiveness  3. Concept: The solution should demonstrate a clear understanding of the underlying concepts involved in the problem. The chosen approach should be appropriate and logical.  4. Explanation: EVERY STEP MUST HAVE AN EXPLANATION AT THE ENDING. Solutions must be accompanied by step-by-step explanations, making them easy to follow. All variables, functions, and formulas used should be defined and explained for clarity. Also, give me a separate explanation at the end of each step.  5. Supporting statements: The solution must be accompanied by a supporting statement. Give me a supporting statement compulsorily for each step along with an explanation  6. Formula: Show every formulas used to solve the question and explain the terms in formula everytime a formula is used.  7. Calculations: Show every small calculation in detail  8. First step: The first step should contain a given and introduction step which gives an introduction about the topics being discussed in the solution for the above question.  9. Last step: The last step should contain a small final solution for the answer.  10. There shouldn't be anytypo errors  11. Double-check all the calculations  12. There must be no words like we,you,I, etc.  13. Structure the solution in the best understandable way for the student  14. Include all the formula along with explaining terms  15. Don't use the pronouns while answering and answer must look like written by human.  16. All the calculations must be accurate and show every minor calculations and conversions also.  17. There must be an explanation for each step at the bottom of the step.  18. I don't need any guidance for the question - I just need the complete perfect & exact answer for the given question.  19. Must mention the sub-subject and topic name at the top of the generated solution.  20. Recheck and recalculate all the calculations before generating the answer.  21. If the solution is from computer science neatly explain every code in a step by step manner with code and explanations for each step. the final solution should contain the whole final code.  22. The explanations step must be lengthy and detailed and should be present in each and every step"
                 }]
             }, {
                 role: "user", content: [{
@@ -134,12 +134,13 @@ const sendMessageToChatGPTWithoutImage = async (inputMessage) => {
             }], temperature: 1, max_tokens: 4095, top_p: 1, frequency_penalty: 0, presence_penalty: 0,
         });
 
-        const rawfile = response.choices[0].message.content.slice(7, -3);
+        const rawfile = response.choices[0].message.content;
+        // console.log(response.choices[0].message.content)
         const newResponse = await openai.chat.completions.create({
             model: "gpt-4o", messages: [{
                 role: "system", content: [{
                     "type": "text",
-                    "text": "Do not change any matter from the taken input. Just Take the given text and Generate the response in html tags code only Do not change Any matter/text. " + "Generate the response only in HTML without body tag with neat formatting and wonderful and modern UI because I have already created a Html page with head and body tag I will just copy the generated response and paste them in my body tag, so generate the code in div container. " + "The math or chemistry terms should be in a way that the user can copy and paste them in the math or given tools. " + "Do not format any equations, numbers, formula or etc. Just format thr UI. " + "Explanations must be present for each and every step. " + "The UI should be very modern looking and follow the styling of instagram"
+                    "text": "Please process the following instructions:\n" + "\n" + "1.  Input Handling : Take the provided text as input without making any alterations to its content.\n" + "\n" + "2.  HTML Response : Generate the response using only HTML tags.\n" + "\n" + "3.  Container Requirement : Ensure that the entire output is wrapped within a `<div>` container.\n" + "\n" + "4.  Body Tag Exclusion : Do not include a `<body>` tag since it's already provided.\n" + "\n" + "5.  Modern UI Design :\n" + "-  Formatting : Use neat formatting with appealing colors.\n" + "-  Styling Elements : Apply shadows and boxes for a modern aesthetic.\n" + "-  Color Scheme : Utilize neat background colors for individual sections along with modern-looking font colors, font sizes, and background colors.\n" + "            \n" + "6.  Copyable Math/Chemistry Terms : Ensure that mathematical or chemistry terms are presented in a format that is easily copyable.\n" + "\n" + "7.  Tables : Format tables neatly within the HTML structure.\n" + "\n" + "8.  CSS Inlining : Style each HTML tag with inline CSS for neat formatting and colors.\"\n" + "9. Font Family: Poppins"
                 }]
             }, {
                 role: "user", content: [{
@@ -147,7 +148,8 @@ const sendMessageToChatGPTWithoutImage = async (inputMessage) => {
                 },]
             }], temperature: 1, max_tokens: 4095, top_p: 1, frequency_penalty: 0, presence_penalty: 0,
         });
-        return newResponse.choices[0].message.content;
+        // console.log(newResponse.choices[0].message.content)
+        return newResponse.choices[0].message.content
     } catch (error) {
         console.error("Error fetching the chat completion:", error);
     }
@@ -184,12 +186,148 @@ bot.on('message', async (msg) => {
         const numberOfPics = msg.photo.length;
         imageURL = await bot.getFileLink(msg.photo[numberOfPics - 1].file_id);
         console.log(imageURL);
-        bot.sendMessage(chatId, `🚀 Hi `, {reply_to_message_id: msgId});
+        sendMessageToChatGPT(msg.text, imageURL)
+            .then((response) => {
+                const htmlContent = createHtmlContent(response, userName, result.questionsRemaining);
+                htmlToPdf(htmlContent, chatId, async (pdfFile) => {
+                    await uploadPdfToMongoDB(pdfFile, chatId, msgId, userName, result.questionsRemaining);
+                });
+            });
     } else if (result.allowed) {
-        bot.sendMessage(chatId, `🚀 Hi `, {reply_to_message_id: msgId});
+        sendMessageToChatGPTWithoutImage(msg.text)
+            .then((response) => {
+                const htmlContent = createHtmlContent(response, userName, result.questionsRemaining);
+                htmlToPdf(htmlContent, chatId, async (pdfFile) => {
+                    await uploadPdfToMongoDB(pdfFile, chatId, msgId, userName, result.questionsRemaining);
+                });
+            });
     }
 });
 
+async function uploadPdfToMongoDB(filePath, chatId, msgId, userName, questionsRemaining) {
+    const {bucket} = await connect();
+    const readStream = fs.createReadStream(filePath);
+    const uploadStream = bucket.openUploadStream(filePath);
+    readStream.pipe(uploadStream);
+
+    uploadStream.on('error', (error) => {
+        console.error("Error uploading PDF to MongoDB:", error);
+    });
+
+    uploadStream.on('finish', async () => {
+        const fileId = uploadStream.id;
+        await sendPdfToUser(chatId, msgId, fileId, userName, questionsRemaining);
+        // await bot.sendMessage(chatId, `🚀 Hi ${userName}!\n\n📊 Questions remaining: ${questionsRemaining} 🤓`, {reply_to_message_id: msgId});
+    });
+}
+
+async function sendPdfToUser(chatId, msgId, fileId, userName, questionsRemaining) {
+    const {bucket} = await connect();
+    const downloadStream = bucket.openDownloadStream(fileId);
+    const bufferStream = new stream.PassThrough();
+    downloadStream.pipe(bufferStream);
+
+    const chunks = [];
+    bufferStream.on('data', (chunk) => {
+        chunks.push(chunk);
+    });
+    bufferStream.on('end', () => {
+        const fileBuffer = Buffer.concat(chunks);
+
+        bot.sendDocument(chatId, fileBuffer, {
+            caption: `\n\n🚀 Hi ${userName}!\n\n📊 Questions remaining: ${questionsRemaining} 🤓\n\nThank you for using CheggSolutionsHub 🙌`,
+            reply_to_message_id: msgId
+        }, {
+            filename: 'Premium Solution', reply_to_message_id: msgId
+        });
+    });
+}
+
+function createHtmlContent(chatResponse, userName, questionsRemaining) {
+    return `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheggSolutions - Thegdp</title>
+    <link rel="icon" href="./logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', Arial, sans-serif;
+            padding: 8px;
+            background-color: #f0f0f0;
+            color: #333;
+            font-size: 16px;
+            position: relative;
+            margin: 0; /* Reset default margin */
+        }
+        h1 {
+            color: darkblue;
+            text-align: center;
+            margin: 10px 0;
+        }
+        h3 {
+            font-size: 24px;
+            font-weight: 400;
+            color: #555;
+            text-align: center;
+            margin: 5px 0;
+        }
+        h4 {
+            font-size: 18px;
+            color: #777;
+            margin-bottom: 5px;
+        }
+        .chat-container {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .chat-bubble {
+            background-color: #e0f7fa;
+            color: #333;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            max-width: 90%;
+            text-align: left;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .title {
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 90%;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="title">
+            <h1>CheggSolutions - Thegdp</h1>
+            <h3>Nikhil Ganireddy</h3>
+        </div>
+        <h4>Username: ${userName}</h4>
+        <h4>Questions Remaining: ${questionsRemaining}</h4>
+        <div class="chat-bubble">
+            ${chatResponse} 
+        </div>
+    </div>
+</body>
+</html>
+    `;
+}
 
 async function htmlToPdf(htmlContent, userId, callback) {
     const filePath = `/tmp/PremiumSolution-${userId}-${Date.now()}.pdf`;
@@ -208,7 +346,7 @@ bot.onText(/\/start@samplebotaibot/, async (msg) => {
     const userName = msg.from.first_name;
     const msgId = msg.message_id;
     await bot.sendMessage(chatId, `\n🚀 Hi ${userName}!\n\n🤖 I am CheggMasterBot, created and developed by Nikhil Ganireddy (thegdp).\n\n❓ Please let me know the question you need help with, and a comprehensive, step-by-step solution will be provided! 📚✨`, {
-        reply_to_message_id: msgId, reply_markup: inlineKeyboard
+        reply_to_message_id: msgId, reply_markup: inlineKeyboard.reply_markup
     });
 });
 

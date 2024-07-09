@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "A telegram bot for chegg",
   "scripts": {
-    "start": "node index2.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Nikhil Ganireddy",
@@ -11,14 +11,17 @@
   "dependencies": {
     "@google/generative-ai": "^0.14.1",
     "axios": "^1.7.2",
+    "chromedriver": "^126.0.4",
     "cloudinary": "^2.2.0",
     "dotenv": "^16.4.5",
+    "express": "^4.19.2",
     "html-pdf": "^3.0.1",
     "mongodb": "^4.1.0",
     "mongoose": "^8.4.1",
     "node-telegram-bot-api": "^0.66.0",
     "openai": "^4.48.1",
-    "puppeteer": "^22.11.1"
+    "puppeteer": "^22.11.1",
+    "selenium-webdriver": "^4.22.0"
   },
   "main": "./src/bot.js",
   "keywords": []
