@@ -7,7 +7,7 @@ const stream = require('stream');
 const puppeteer = require('puppeteer');
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY || "sk-proj-xLdeNyoGyEBGQnrgA54BT3BlbkFJi7dklh1tdELX73VbdIkZ",
+    apiKey: process.env.OPENAI_API_KEY
 });
 
 // MongoDB setup
