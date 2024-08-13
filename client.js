@@ -7,9 +7,9 @@ const stream = require('stream');
 const puppeteer = require('puppeteer');
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY
+    apiKey: process.env.OPENAI_API_KEY|| "sk-proj-XJM0yXnrQhrd1YKSyCnuT3BlbkFJQzKBK9rONvIO0a14FaUt"
 });
-
+683748212
 // MongoDB setup
 const url = "mongodb+srv://nikhilganireddy:Kakatiya2021@cluster0.tdfpdad.mongodb.net/chatgpt-4-sample";
 const client = new MongoClient(url);
@@ -28,6 +28,8 @@ async function connect() {
 const token = "6813317549:AAHzK5R0CxbczrOMKD75umxXCtxS0rDfhWc";
 const bot = new TelegramBot(token, {polling: true});
 
+const clientId = "683748212"
+const clientName="Sanjay's Team"
 // Other Constants
 let imageURL;
 
@@ -36,23 +38,37 @@ const inlineKeyboard = {
     reply_markup: {
         inline_keyboard: [[{
             text: 'Check Prices', url: `https://t.me/CheggsolutionsHub_Unlock`
-        }, {text: 'Buy Subscription', url: `https://nikhilganireddy.vercel.app`}], [{
+        }, {text: 'Buy Subscription', url: `https://t.me/CheggsolutionsHub_Unlock`}], [{
             text: "Contact Admin", url: `https://t.me/nikhilganireddy`
         }]]
     }
 };
 
 // Subscription Management
-const checkSubscription = async (userId, userName) => {
+const checkSubscription = async (userId, userName, chatId) => {
     const {users} = await connect();
+    console.log(userId,userName)
+    if (chatId == "-1002191740903") {
+        userId = clientId
+        userName = clientName
+
+    }
+    console.log(userId,userName)
     const user = await users.findOne({userId});
     if (user && user.questionsRemaining <= 0) return `\n🔔 Attention, ${userName}! 🔔\n\nYour account currently has 0 questions available. Please consider purchasing additional questions to continue using CheggSolutionsHub.\n\nThank you for using CheggSolutionsHub! 🌟`
     if (user && user.questionsRemaining > 0) return `\n📚 Hello, ${userName}! 📚\n\nYou have ${user.questionsRemaining} questions remaining in your account.\n\nHappy solving with CheggSolutionsHub! 🌟`
     if (!user) return `\n🚫 Hello, ${userName}! 🚫\n\nYou have not yet subscribed. Please consider subscribing to access our solutions and enhance your learning experience.\n\nThank you for using CheggSolutionsHub! 🌟`
 }
 
-const decrementQuestionCount = async (userId, userName) => {
+const decrementQuestionCount = async (userId, userName, chatId) => {
     const {users} = await connect();
+    console.log(userId,userName)
+    if (chatId == "-1002191740903") {
+        userId = clientId
+        userName = clientName
+
+    }
+    console.log(userId,userName)
     const user = await users.findOne({userId});
     if (!user) {
         return {
@@ -184,7 +200,11 @@ async function sendPdfToUser(chatId, msgId, fileId, userName, questionsRemaining
     });
     bufferStream.on('end', () => {
         const fileBuffer = Buffer.concat(chunks);
-
+        console.log(userName)
+        if (chatId == "-1002191740903") {
+            userName = clientName
+        }
+        console.log(userName)
         bot.sendDocument(chatId, fileBuffer, {
             caption: `\n\n🚀 Hi ${userName}!\n\n📊 Questions remaining: ${questionsRemaining} 🤓\n\nThank you for using CheggSolutionsHub 🙌`,
             reply_to_message_id: msgId
@@ -194,7 +214,12 @@ async function sendPdfToUser(chatId, msgId, fileId, userName, questionsRemaining
     });
 }
 
-function createHtmlContent(chatResponse, userName, questionsRemaining) {
+function createHtmlContent(chatId, chatResponse, userName, questionsRemaining) {
+    console.log(userName)
+    if (chatId == "-1002191740903") {
+        userName = clientName
+    }
+    console.log(userName)
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -295,20 +320,9 @@ async function htmlToPdf(htmlContent, userId, callback) {
 bot.onText(/\/start@samplebotaibot/, async (msg) => {
     const chatId = msg.chat.id;
     const userName = msg.from.first_name;
-    const userId = msg.from.id;
     const msgId = msg.message_id;
     await bot.sendMessage(chatId, `\n🚀 Hi ${userName}!\n\n🤖 I am CheggMasterBot, created and developed by Nikhil Ganireddy (thegdp).\n\n❓ Please let me know the question you need help with, and a comprehensive, step-by-step solution will be provided! 📚✨`, {
-        reply_to_message_id: msgId, reply_markup: {
-            inline_keyboard: [
-                [
-                    { text: 'Check Prices', url: 'https://t.me/CheggsolutionsHub_Unlock' },
-                    { text: 'Buy Subscription', url: `https://razorpay-thegdp.vercel.app/buy_questions/${userName}___${userId}` }
-                ],
-                [
-                    { text: 'Contact Admin', url: 'https://t.me/nikhilganireddy' }
-                ]
-            ]
-        }
+        reply_to_message_id: msgId, reply_markup: inlineKeyboard.reply_markup
     });
 });
 
@@ -317,19 +331,11 @@ bot.onText(/\/checksub@samplebotaibot/, async (msg) => {
     const userId = msg.from.id;
     const userName = msg.from.first_name;
     const msgId = msg.message_id;
-    const subscriptionMessage = await checkSubscription(userId, userName);
+
+    console.log(chatId, userId, userName, msgId)
+    const subscriptionMessage = await checkSubscription(userId, userName, chatId);
     await bot.sendMessage(chatId, `${subscriptionMessage}`, {
-        reply_to_message_id: msgId, reply_markup: {
-            inline_keyboard: [
-                [
-                    { text: 'Check Prices', url: 'https://t.me/CheggsolutionsHub_Unlock' },
-                    { text: 'Buy Subscription', url: `https://razorpay-thegdp.vercel.app/buy_questions/${userName}___${userId}` }
-                ],
-                [
-                    { text: 'Contact Admin', url: 'https://t.me/nikhilganireddy' }
-                ]
-            ]
-        }
+        reply_to_message_id: msgId, reply_markup: inlineKeyboard.reply_markup
     });
 });
 
@@ -344,7 +350,7 @@ bot.onText(/\/add (\d+) (\d+)/, async (msg, match) => {
     const questions = parseInt(match[2]);
     await addSubscription(userId, questions);
     await bot.sendMessage(chatId, `\n✨ Subscription Added! ✨\n\nYou now have ${questions} questions available.\n\n👤 User ID: ${userId}\n\nThank you for using CheggSolutionsHub! 🎉`, {
-        reply_to_message_id: msgId, 
+        reply_to_message_id: msgId, reply_markup: inlineKeyboard.reply_markup
     });
     await bot.sendMessage(userId, ` \n✨ Subscription Added! ✨\n\nYou now have ${questions} questions available.\n\nThank you for using CheggSolutionsHub! 🎉`)
     await bot.sendMessage(userId, `1. The bot will not generate diagrams, sketches, or graphs. ✋\n\n
@@ -355,10 +361,10 @@ bot.onText(/\/add (\d+) (\d+)/, async (msg, match) => {
 });
 
 bot.on('message', async (msg) => {
-    const chatId = msg.chat.id;
-    const userId = msg.from.id;
-    const userName = msg.from.first_name;
-    const msgId = msg.message_id;
+    let chatId = msg.chat.id;
+    let userId = msg.from.id;
+    let userName = msg.from.first_name;
+    let msgId = msg.message_id;
 
     function splitString(str) {
         if (str && str.length > 50) {
@@ -368,28 +374,25 @@ bot.on('message', async (msg) => {
         }
     }
 
+    console.log(userId,userName)
+    if (chatId == "-1002191740903") {
+        userId = clientId
+        userName = clientName
+
+    }
+    console.log(userId,userName)
     await bot.sendMessage(-1002226746384, `👤 User Information\n\nUsername: ${userName}\nUser ID: ${userId}\nChat ID: ${chatId}\n\n📩 Input Message\n\n${splitString(msg.text)}\n\n`);
     if (isCommand(msg.text)) {
         return;
     }
 
-    const result = await decrementQuestionCount(userId, userName);
+    const result = await decrementQuestionCount(userId, userName, chatId);
     if (msg.text === "Welcome to the group!" && !result.allowed) {
         return;
     }
     if (msg.text !== "Welcome to the group!" && !result.allowed) {
         await bot.sendMessage(chatId, result.message, {
-            reply_to_message_id: msgId, reply_markup: {
-                inline_keyboard: [
-                    [
-                        { text: 'Check Prices', url: 'https://t.me/CheggsolutionsHub_Unlock' },
-                        { text: 'Buy Subscription', url: `https://razorpay-thegdp.vercel.app/buy_questions/${userName}___${userId}` }
-                    ],
-                    [
-                        { text: 'Contact Admin', url: 'https://t.me/nikhilganireddy' }
-                    ]
-                ]
-            }
+            reply_to_message_id: msgId, reply_markup: inlineKeyboard.reply_markup
         });
         return;
     }
@@ -400,7 +403,7 @@ bot.on('message', async (msg) => {
         console.log(imageURL);
         sendMessageToChatGPT(msg.text, imageURL)
             .then((response) => {
-                const htmlContent = createHtmlContent(response, userName, result.questionsRemaining);
+                const htmlContent = createHtmlContent(chatId,response, userName, result.questionsRemaining);
                 htmlToPdf(htmlContent, chatId, async (pdfFile) => {
                     await uploadPdfToMongoDB(pdfFile, chatId, msgId, userName, result.questionsRemaining);
                 });
@@ -408,7 +411,7 @@ bot.on('message', async (msg) => {
     } else if (msg.text !== "Welcome to the group!" && result.allowed) {
         sendMessageToChatGPTWithoutImage(msg.text)
             .then((response) => {
-                const htmlContent = createHtmlContent(response, userName, result.questionsRemaining);
+                const htmlContent = createHtmlContent(chatId, response, userName, result.questionsRemaining);
                 htmlToPdf(htmlContent, chatId, async (pdfFile) => {
                     await uploadPdfToMongoDB(pdfFile, chatId, msgId, userName, result.questionsRemaining);
                 });
